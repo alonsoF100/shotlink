@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/alonsoF100/shotlink/internal/config"
 	"github.com/alonsoF100/shotlink/internal/logger"
+	"github.com/alonsoF100/shotlink/internal/transport/http/routing"
 )
 
 func main() {
@@ -13,9 +13,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Config error: %s", err.Error())
 	}
-	fmt.Println(cfg.Server.Port)
 
-	logger := logger.Setup(cfg.Log)
-	logger.Info("dfssf")
+	logger.Setup(cfg.Log)
 
+	router := routing.SetupRouter()
+	router.Run(cfg.Server.Addr())
 }
