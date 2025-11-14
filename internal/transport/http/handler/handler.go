@@ -93,7 +93,7 @@ func (h *Handler) Redirect(c *gin.Context) {
 }
 
 func (h *Handler) GetLinkInfo(c *gin.Context) {
-	var req dto.GetLinkInfoRequest // 👈 твоя DTO для этого хендлера
+	var req dto.GetLinkInfoRequest
 
 	if err := c.ShouldBindUri(&req); err != nil {
 		slog.Warn("Invalid short code in URI", "error", err)
