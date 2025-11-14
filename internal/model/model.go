@@ -5,6 +5,7 @@ import "time"
 type ShortURL struct {
 	ID          string    `json:"id" db:"id"`
 	OriginalURL string    `json:"original_url" db:"original_url"`
+	ShortCode   string    `json:"short_code" db:"short_code"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	ExpiresAt   time.Time `json:"expires_at" db:"expires_at"`
 	ClickCount  int64     `json:"click_count" db:"click_count"`
