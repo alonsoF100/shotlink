@@ -12,9 +12,9 @@ import (
 )
 
 type Service interface {
-	CreateShortURL(context.Context, string, *string) (*model.ShortURL, error)
-	Redirect(context.Context, string) (string, error)
-	GetLinkInfo(context.Context, string) (*model.ShortURL, error)
+	CreateShortURL(ctx context.Context, url string, CustomCode *string) (*model.ShortURL, error)
+	Redirect(ctx context.Context, CustomCode string) (string, error)
+	GetLinkInfo(ctx context.Context, CustomCode string) (*model.ShortURL, error)
 }
 
 type Handler struct {
