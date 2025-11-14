@@ -34,8 +34,9 @@ func main() {
 	defer pool.Close()
 
 	service := service.New(nil, nil)
-
 	router := routing.SetupRouter(service, cfg.Server.BaseURL)
+
+	done := make(chan struct{})
 
 	go func() {
 		sigChan := make(chan os.Signal, 1)
@@ -44,12 +45,17 @@ func main() {
 
 		slog.Info("Shutting down gracefully...")
 		cancel()
-		pool.Close()
-		os.Exit(0)
+		close(done)
 	}()
 
-	slog.Info("Starting server", "port", cfg.Server.Port)
-	if err := router.Run(cfg.Server.Addr()); err != nil {
-		slog.Error("Server failed", "error", err)
-	}
+	go func() {
+		slog.Info("Starting server", "port", cfg.Server.Port)
+		if err := router.Run(cfg.Server.Addr()); err != nil {
+			slog.Error("Server failed", "error", err)
+		}
+		close(done)
+	}()
+
+	<-done
+	slog.Info("Shutdown complete")
 }
