@@ -5,6 +5,7 @@ import (
 
 	"github.com/alonsoF100/shotlink/internal/config"
 	"github.com/alonsoF100/shotlink/internal/logger"
+	"github.com/alonsoF100/shotlink/internal/transport/http/handler"
 	"github.com/alonsoF100/shotlink/internal/transport/http/routing"
 )
 
@@ -16,6 +17,7 @@ func main() {
 
 	logger.Setup(cfg.Log)
 
-	router := routing.SetupRouter()
+	var service handler.Service = nil
+	router := routing.SetupRouter(service, cfg.Server.BaseURL)
 	router.Run(cfg.Server.Addr())
 }

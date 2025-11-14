@@ -1,5 +1,6 @@
 server:
   port: 8080
+  base_url: "https://shot.link" 
 
 database:
   host: "localhost"

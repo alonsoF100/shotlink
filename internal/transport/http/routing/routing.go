@@ -5,9 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(service handler.Service, baseURL string) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
+
+	handler := handler.New(service, baseURL)
 
 	router.POST("/api/shorten", handler.CreateShortURL)
 	router.GET("/:code", handler.Redirect)
