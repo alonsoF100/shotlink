@@ -11,7 +11,7 @@ func SetupRouter(service handler.Service, baseURL string) *gin.Engine {
 
 	handler := handler.New(service, baseURL)
 
-	router.POST("/api/shorten", handler.CreateShortURL)
+	router.POST("/shorten", handler.CreateShortURL)
 	router.GET("/:code", handler.Redirect)
 	
 	return router
