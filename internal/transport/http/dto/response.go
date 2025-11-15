@@ -36,14 +36,19 @@ type ShortURLInfoResponse struct {
 }
 
 func NewShortURLInfoResponse(shortURL *model.ShortURL, baseURL string) ShortURLInfoResponse {
-	return ShortURLInfoResponse{
-		ID:          shortURL.ID,
+	response := ShortURLInfoResponse{
+		ID:          shortURL.ID.String(),
 		ShortURL:    baseURL + "/" + shortURL.ShortCode,
 		OriginalURL: shortURL.OriginalURL,
 		ShortCode:   shortURL.ShortCode,
 		CreatedAt:   shortURL.CreatedAt.Format(time.RFC3339),
-		ExpiresAt:   shortURL.ExpiresAt.Format(time.RFC3339),
 		ClickCount:  shortURL.ClickCount,
 		IsActive:    shortURL.IsActive,
 	}
+
+	if shortURL.ExpiresAt != nil {
+		response.ExpiresAt = shortURL.ExpiresAt.Format(time.RFC3339)
+	}
+
+	return response
 }
