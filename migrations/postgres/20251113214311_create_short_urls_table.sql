@@ -5,7 +5,6 @@ CREATE TABLE short_urls (
     original_url TEXT NOT NULL,
     short_code VARCHAR(10) UNIQUE NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    expires_at TIMESTAMPTZ NULL,
     click_count BIGINT DEFAULT 0,
     is_active BOOLEAN DEFAULT true
 );

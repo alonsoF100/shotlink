@@ -12,9 +12,8 @@ import (
 )
 
 type Service interface {
-	CreateShortURL(ctx context.Context, url string, CustomCode *string) (*model.ShortURL, error)
-	Redirect(ctx context.Context, CustomCode string) (string, error)
-	GetLinkInfo(ctx context.Context, CustomCode string) (*model.ShortURL, error)
+	CreateShortURL(ctx context.Context, req dto.CreateShortURLRequest) (*model.ShortURL, error)
+	Redirect(ctx context.Context, req dto.RedirectRequest) (string, error)
 }
 
 type Handler struct {
@@ -30,15 +29,15 @@ func (h *Handler) CreateShortURL(c *gin.Context) {
 	var req dto.CreateShortURLRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		slog.Warn("Invalid request", "error", err)
-		c.JSON(400, gin.H{"error": "Invalid request format"})
+		slog.Warn("invalid request", "error", err)
+		c.JSON(400, gin.H{"error": "invalid request format"})
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 4*time.Second)
 	defer cancel()
 
-	shortURL, err := h.service.CreateShortURL(ctx, req.URL, req.CustomCode)
+	shortURL, err := h.service.CreateShortURL(ctx, req)
 	if err != nil {
 		slog.Error("Service error", "error", err, "URL", req.URL)
 
@@ -47,7 +46,7 @@ func (h *Handler) CreateShortURL(c *gin.Context) {
 			c.JSON(409, gin.H{"error": "URL already exists"})
 			return
 		case ers.ErrInvalidURL:
-			c.JSON(400, gin.H{"error": "Invalid URL"})
+			c.JSON(400, gin.H{"error": "invalid URL"})
 			return
 		default:
 			c.JSON(500, gin.H{"error": "internal server error"})
@@ -55,7 +54,7 @@ func (h *Handler) CreateShortURL(c *gin.Context) {
 		return
 	}
 
-	response := dto.NewCreateShortURLResponse(shortURL, h.baseURL, req.CustomCode != nil)
+	response := shortURL
 
 	c.JSON(201, response)
 }
@@ -72,9 +71,9 @@ func (h *Handler) Redirect(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
 	defer cancel()
 
-	originalURL, err := h.service.Redirect(ctx, req.CustomCode)
+	originalURL, err := h.service.Redirect(ctx, req)
 	if err != nil {
-		slog.Error("Redirect error", "error", err, "short code", req.CustomCode)
+		slog.Error("Redirect error", "error", err, "short code", req.ShortCode)
 
 		switch err {
 		case ers.ErrURLNotFound:
@@ -90,35 +89,4 @@ func (h *Handler) Redirect(c *gin.Context) {
 	}
 
 	c.Redirect(302, originalURL)
-}
-
-func (h *Handler) GetLinkInfo(c *gin.Context) {
-	var req dto.GetLinkInfoRequest
-
-	if err := c.ShouldBindUri(&req); err != nil {
-		slog.Warn("Invalid short code in URI", "error", err)
-		c.JSON(400, gin.H{"error": "Invalid short code format"})
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	shortURL, err := h.service.GetLinkInfo(ctx, req.CustomCode)
-	if err != nil {
-		slog.Error("Get link info error", "error", err, "short code", req.CustomCode)
-
-		switch err {
-		case ers.ErrURLNotFound:
-			c.JSON(404, gin.H{"error": "Short URL not found"})
-		case ers.ErrURLExpired:
-			c.JSON(410, gin.H{"error": "Short URL has expired"})
-		default:
-			c.JSON(500, gin.H{"error": "Internal server error"})
-		}
-		return
-	}
-
-	response := dto.NewShortURLInfoResponse(shortURL, h.baseURL)
-	c.JSON(200, response)
 }

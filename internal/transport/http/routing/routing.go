@@ -13,7 +13,6 @@ func SetupRouter(service handler.Service, baseURL string) *gin.Engine {
 
 	router.POST("/api/shorten", handler.CreateShortURL)
 	router.GET("/:code", handler.Redirect)
-	router.GET("/api/links/:code", handler.GetLinkInfo)
-
+	
 	return router
 }
