@@ -39,16 +39,15 @@ func (h *Handler) CreateShortURL(c *gin.Context) {
 
 	shortURL, err := h.service.CreateShortURL(ctx, req)
 	if err != nil {
-		slog.Error("Service error", "error", err, "URL", req.URL)
+		slog.Error("Service error", "error", err, "URL", req.OriginalURL)
 
 		switch err {
 		case ers.ErrURLAlreadyExists:
 			c.JSON(409, gin.H{"error": "URL already exists"})
-			return
-		case ers.ErrInvalidURL:
-			c.JSON(400, gin.H{"error": "invalid URL"})
-			return
+		case ers.ErrShortCodeTaken:
+			c.JSON(409, gin.H{"error": "Short code is already taken"})
 		default:
+			slog.Error("Internal server error", "error", err)
 			c.JSON(500, gin.H{"error": "internal server error"})
 		}
 		return
@@ -76,13 +75,10 @@ func (h *Handler) Redirect(c *gin.Context) {
 		slog.Error("Redirect error", "error", err, "short code", req.ShortCode)
 
 		switch err {
-		case ers.ErrURLNotFound:
+		case ers.ErrShortCodeNotFound:
 			c.JSON(404, gin.H{"error": "Short URL not found"})
-		case ers.ErrURLExpired:
-			c.JSON(410, gin.H{"error": "Short URL has expired"})
-		case ers.ErrURLBlocked:
-			c.JSON(403, gin.H{"error": "URL is not allowed"})
 		default:
+			slog.Error("Internal server error", "error", err)
 			c.JSON(500, gin.H{"error": "Internal server error"})
 		}
 		return

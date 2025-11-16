@@ -30,8 +30,9 @@ func main() {
 	}
 	defer pool.Close()
 
-	service := service.New(nil)
-	router := routing.SetupRouter(service, cfg.Server.BaseURL)
+	urlService := postgres.NewURLRepository(pool)
+	service := service.New(urlService)
 
+	router := routing.SetupRouter(service, cfg.Server.BaseURL)
 	router.Run(cfg.Server.Addr())
 }
